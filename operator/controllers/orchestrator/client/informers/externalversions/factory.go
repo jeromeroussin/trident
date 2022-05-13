@@ -47,7 +47,6 @@ func WithCustomResyncConfig(resyncConfig map[v1.Object]time.Duration) SharedInfo
 
 // WithTweakListOptions sets a custom filter on all listers of the configured SharedInformerFactory.
 func WithTweakListOptions(tweakListOptions internalinterfaces.TweakListOptionsFunc) SharedInformerOption {
-func WithCustomResyncConfig(resyncConfig map[v1.Object]time.Duration) SharedInformerOption {
 	return func(factory *sharedInformerFactory) *sharedInformerFactory {
 		factory.tweakListOptions = tweakListOptions
 		return factory
@@ -56,7 +55,6 @@ func WithCustomResyncConfig(resyncConfig map[v1.Object]time.Duration) SharedInfo
 
 // WithNamespace limits the SharedInformerFactory to the specified namespace.
 func WithNamespace(namespace string) SharedInformerOption {
-func WithTweakListOptions(tweakListOptions internalinterfaces.TweakListOptionsFunc) SharedInformerOption {
 	return func(factory *sharedInformerFactory) *sharedInformerFactory {
 		factory.namespace = namespace
 		return factory
@@ -65,7 +63,6 @@ func WithTweakListOptions(tweakListOptions internalinterfaces.TweakListOptionsFu
 
 // NewSharedInformerFactory constructs a new instance of sharedInformerFactory for all namespaces.
 func NewSharedInformerFactory(client versioned.Interface, defaultResync time.Duration) SharedInformerFactory {
-func WithNamespace(namespace string) SharedInformerOption {
 	return NewSharedInformerFactoryWithOptions(client, defaultResync)
 }
 
@@ -74,13 +71,11 @@ func WithNamespace(namespace string) SharedInformerOption {
 // as specified here.
 // Deprecated: Please use NewSharedInformerFactoryWithOptions instead
 func NewFilteredSharedInformerFactory(client versioned.Interface, defaultResync time.Duration, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) SharedInformerFactory {
-func NewSharedInformerFactory(client versioned.Interface, defaultResync time.Duration) SharedInformerFactory {
 	return NewSharedInformerFactoryWithOptions(client, defaultResync, WithNamespace(namespace), WithTweakListOptions(tweakListOptions))
 }
 
 // NewSharedInformerFactoryWithOptions constructs a new instance of a SharedInformerFactory with additional options.
 func NewSharedInformerFactoryWithOptions(client versioned.Interface, defaultResync time.Duration, options ...SharedInformerOption) SharedInformerFactory {
-func NewFilteredSharedInformerFactory(client versioned.Interface, defaultResync time.Duration, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) SharedInformerFactory {
 	factory := &sharedInformerFactory{
 		client:           client,
 		namespace:        v1.NamespaceAll,
@@ -100,7 +95,6 @@ func NewFilteredSharedInformerFactory(client versioned.Interface, defaultResync 
 
 // Start initializes all requested informers.
 func (f *sharedInformerFactory) Start(stopCh <-chan struct{}) {
-func NewSharedInformerFactoryWithOptions(client versioned.Interface, defaultResync time.Duration, options ...SharedInformerOption) SharedInformerFactory {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
@@ -114,7 +108,6 @@ func NewSharedInformerFactoryWithOptions(client versioned.Interface, defaultResy
 
 // WaitForCacheSync waits for all started informers' cache were synced.
 func (f *sharedInformerFactory) WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool {
-func (f *sharedInformerFactory) Start(stopCh <-chan struct{}) {
 	informers := func() map[reflect.Type]cache.SharedIndexInformer {
 		f.lock.Lock()
 		defer f.lock.Unlock()
@@ -137,30 +130,23 @@ func (f *sharedInformerFactory) Start(stopCh <-chan struct{}) {
 
 // InternalInformerFor returns the SharedIndexInformer for obj using an internal
 // client.
-func (f *sharedInformerFactory) InformerFor(obj runtime.Object, newFunc internalinterfaces.NewInformerFunc) cache.SharedIndexInformer {
-// InformerFor returns the SharedIndexInformer for obj using an external client.
+// InformerFor is the same as SharedInformerFactory.InformerFor, except it uses the default resync period.
+// It returns an informer for the given object type.
 // Parameters:
-//   obj - the object
+//   obj - the object type
+//   newFunc - a function that returns a new informer for the given object.
+//             It is usually an anonymous function:
+//               func(client internalclientset.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+//                 return NewFilteredFooInformer(client, resyncPeriod, namespace, tweakListOptions)
+//               }
 // Returns:
-//   SharedIndexInformer
+//   An informer for the given object type.
 // Example:
-//   lister := f.InformerFor(&v1.Pod{}, func(client clientset.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-//     return cache.NewSharedIndexInformer(
-//       &cache.ListWatch{
-//         ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
-//           return client.CoreV1().Pods(api.NamespaceAll).List(options)
-//         },
-//         WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
-//           return client.CoreV1().Pods(api.NamespaceAll).Watch(options)
-//         },
-//       },
-//       &v1.Pod{},
-//       resyncPeriod,
-//       cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc},
-//     )
-//   }
+//   informer := externalversions.InformerFor(&appsv1.Deployment{}, func(client internalclientset.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+//     return NewFilteredDeploymentInformer(client, resyncPeriod, namespace, tweakListOptions)
+//   })
 //
-// -- Doc autogenerated on 2022-05-12 18:43:51.155916 --
+// -- Doc autogenerated on 2022-05-12 20:54:01.837641 --
 func (f *sharedInformerFactory) InformerFor(obj runtime.Object, newFunc internalinterfaces.NewInformerFunc) cache.SharedIndexInformer {
 	f.lock.Lock()
 	defer f.lock.Unlock()
@@ -192,14 +178,15 @@ type SharedInformerFactory interface {
 	Trident() netapp.Interface
 }
 
-// Trident returns a new Interface.
+// Trident is the external version of the API.
+// It returns the Trident API client.
 // Returns:
-//   - a new Interface
-//   - error if there is an error initializing the client
+//   netapp.Interface: Trident API client
 // Example:
-//   - tridentClient, err := Trident(config)
+//   Trident(), err := externalversions.Trident()
+//   TridentClient := Trident.NetAppV1()
 //
-// -- Doc autogenerated on 2022-05-12 18:43:51.155916 --
+// -- Doc autogenerated on 2022-05-12 20:54:01.837641 --
 func (f *sharedInformerFactory) Trident() netapp.Interface {
 	return netapp.New(f, f.namespace, f.tweakListOptions)
 }
