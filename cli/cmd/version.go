@@ -18,9 +18,7 @@ import (
 	"github.com/netapp/trident/utils"
 )
 
-var (
-	clientOnly bool
-)
+var clientOnly bool
 
 func init() {
 	RootCmd.AddCommand(versionCmd)
@@ -38,7 +36,6 @@ var versionCmd = &cobra.Command{
 		return err
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-
 		if clientOnly {
 			writeVersion(getClientVersion())
 		} else {
@@ -49,7 +46,6 @@ var versionCmd = &cobra.Command{
 			// Get the server version
 			if OperatingMode == ModeTunnel {
 				serverVersion, err = getVersionFromTunnel()
-
 			} else {
 				serverVersion, err = getVersionFromRest()
 			}
@@ -78,7 +74,6 @@ var versionCmd = &cobra.Command{
 
 // getVersion retrieves the Trident server version directly using the REST API
 func getVersionFromRest() (rest.GetVersionResponse, error) {
-
 	url := BaseURL() + "/version"
 
 	response, responseBody, err := api.InvokeRESTAPI("GET", url, nil, Debug)
@@ -100,15 +95,16 @@ func getVersionFromRest() (rest.GetVersionResponse, error) {
 
 // getVersionFromTunnel retrieves the Trident server version using the exec tunnel
 func getVersionFromTunnel() (rest.GetVersionResponse, error) {
-
 	command := []string{"version", "-o", "json"}
-	versionJSON, err := TunnelCommandRaw(command)
+	versionJSON, stderrOut, err := TunnelCommandRaw(command)
 	if err != nil {
 		if len(versionJSON) > 0 {
 			err = fmt.Errorf("%v; %s", err, string(versionJSON))
 		}
 		return rest.GetVersionResponse{}, err
 	}
+
+	os.Stderr.Write(stderrOut)
 
 	if Debug {
 		fmt.Printf("Version JSON: %s\n", versionJSON)
@@ -144,7 +140,6 @@ func getClientVersion() *api.ClientVersionResponse {
 
 // addClientVersion accepts the server version and fills in the client version
 func addClientVersion(serverVersion *utils.Version) *api.VersionResponse {
-
 	versions := api.VersionResponse{}
 
 	versions.Server.Version = serverVersion.String()
@@ -187,7 +182,6 @@ func writeVersions(versions *api.VersionResponse) {
 }
 
 func writeVersionTable(version *api.ClientVersionResponse) {
-
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Client Version"})
 
@@ -199,7 +193,6 @@ func writeVersionTable(version *api.ClientVersionResponse) {
 }
 
 func writeVersionsTable(versions *api.VersionResponse) {
-
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Server Version", "Client Version"})
 
@@ -212,7 +205,6 @@ func writeVersionsTable(versions *api.VersionResponse) {
 }
 
 func writeWideVersionTable(version *api.ClientVersionResponse) {
-
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Client Version", "Client API Version", "Client Go Version"})
 
@@ -226,10 +218,11 @@ func writeWideVersionTable(version *api.ClientVersionResponse) {
 }
 
 func writeWideVersionsTable(versions *api.VersionResponse) {
-
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Server Version", "Server API Version", "Server Go Version", "Client Version",
-		"Client API Version", "Client Go Version"})
+	table.SetHeader([]string{
+		"Server Version", "Server API Version", "Server Go Version", "Client Version",
+		"Client API Version", "Client Go Version",
+	})
 
 	table.Append([]string{
 		versions.Server.Version,

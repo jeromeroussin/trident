@@ -1,4 +1,4 @@
-// Copyright 2019 NetApp, Inc. All Rights Reserved.
+// Copyright 2022 NetApp, Inc. All Rights Reserved.
 
 package v1
 
@@ -7,15 +7,15 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/netapp/trident/config"
-	"github.com/netapp/trident/storage"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+
+	"github.com/netapp/trident/config"
+	"github.com/netapp/trident/storage"
 )
 
 func TestNewTransaction(t *testing.T) {
-
 	// Build volume transaction
 	volConfig := &storage.VolumeConfig{
 		Version:      string(config.OrchestratorAPIVersion),
@@ -57,7 +57,6 @@ func TestNewTransaction(t *testing.T) {
 }
 
 func TestNewSnapshotTransaction(t *testing.T) {
-
 	// Build volume transaction
 	volConfig := &storage.VolumeConfig{
 		Version:      string(config.OrchestratorAPIVersion),
@@ -105,7 +104,6 @@ func TestNewSnapshotTransaction(t *testing.T) {
 }
 
 func TestNewUpgradeTransaction(t *testing.T) {
-
 	// Build volume transaction
 	volConfig := &storage.VolumeConfig{
 		Version:      string(config.OrchestratorAPIVersion),

@@ -1,4 +1,4 @@
-// Copyright 2021 NetApp, Inc. All Rights Reserved.
+// Copyright 2022 NetApp, Inc. All Rights Reserved.
 
 package ontap
 
@@ -7,12 +7,13 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
 	mock_api "github.com/netapp/trident/mocks/mock_storage_drivers/mock_ontap"
 	"github.com/netapp/trident/storage_drivers/ontap/api"
 	"github.com/netapp/trident/storage_drivers/ontap/api/azgo"
 	"github.com/netapp/trident/storage_drivers/ontap/api/rest/client/storage"
 	"github.com/netapp/trident/storage_drivers/ontap/api/rest/models"
-	"github.com/stretchr/testify/assert"
 )
 
 func NewAPIResponse(
@@ -28,7 +29,6 @@ var (
 )
 
 func TestApiGetError(t *testing.T) {
-
 	ctx := context.Background()
 
 	var snapListResponseErr error
@@ -50,7 +50,6 @@ func TestApiGetError(t *testing.T) {
 }
 
 func TestZapiGetSVMAggregateSpace(t *testing.T) {
-
 	ctx := context.Background()
 
 	aggr := "aggr1"
@@ -216,7 +215,6 @@ func TestZapiGetSVMAggregateSpace(t *testing.T) {
 }
 
 func TestRestGetSVMAggregateSpace(t *testing.T) {
-
 	ctx := context.Background()
 
 	aggr := "aggr1"
@@ -477,7 +475,6 @@ func newMockOntapAPI(t *testing.T) *mock_api.MockOntapAPI {
 }
 
 func TestCheckAggregateLimitsAbstraction(t *testing.T) {
-
 	ctx := context.Background()
 
 	aggr := "aggr1"

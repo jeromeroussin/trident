@@ -1,4 +1,4 @@
-// Copyright 2019 NetApp, Inc. All Rights Reserved.
+// Copyright 2022 NetApp, Inc. All Rights Reserved.
 
 package v1
 
@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/netapp/trident/storage"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+
+	"github.com/netapp/trident/storage"
 )
 
 func TestNewSnapshot(t *testing.T) {
-
 	// Build snapshot
 	testSnapshot := getFakeSnapshot()
 
@@ -34,7 +34,6 @@ func TestNewSnapshot(t *testing.T) {
 }
 
 func TestSnapshot_Persistent(t *testing.T) {
-
 	// Build snapshot
 	testSnapshot := getFakeSnapshot()
 
@@ -57,7 +56,6 @@ func TestSnapshot_Persistent(t *testing.T) {
 }
 
 func getFakeSnapshot() *storage.Snapshot {
-
 	testSnapshotConfig := &storage.SnapshotConfig{
 		Version:            "1",
 		Name:               "testsnap1",
@@ -74,7 +72,6 @@ func getFakeSnapshot() *storage.Snapshot {
 }
 
 func getFakeSnapshotCRD(snapshot *storage.Snapshot) *TridentSnapshot {
-
 	crd := &TridentSnapshot{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "trident.netapp.io/v1",

@@ -1,19 +1,19 @@
-// Copyright 2019 NetApp, Inc. All Rights Reserved.
+// Copyright 2022 NetApp, Inc. All Rights Reserved.
 
 package v1
 
 import (
 	"encoding/json"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	storageclass "github.com/netapp/trident/storage_class"
 	"github.com/netapp/trident/utils"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // NewTridentStorageClass creates a new storage class CRD object from a internal
 // storageclass.Persistent object
 func NewTridentStorageClass(persistent *storageclass.Persistent) (*TridentStorageClass, error) {
-
 	tsc := &TridentStorageClass{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "trident.netapp.io/v1",

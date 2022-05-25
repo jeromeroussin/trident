@@ -12,7 +12,6 @@ import (
 )
 
 func TestCreateVirtualNetworkID(t *testing.T) {
-
 	actual := CreateVirtualNetworkID("mySubscription", "myResourceGroup", "myVnet")
 
 	expected := "/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/myVnet"
@@ -21,7 +20,6 @@ func TestCreateVirtualNetworkID(t *testing.T) {
 }
 
 func TestCreateVirtualNetworkFullName(t *testing.T) {
-
 	actual := CreateVirtualNetworkFullName("myResourceGroup", "myVirtualNetwork")
 
 	expected := "myResourceGroup/myVirtualNetwork"
@@ -30,7 +28,6 @@ func TestCreateVirtualNetworkFullName(t *testing.T) {
 }
 
 func TestCreateSubnetID(t *testing.T) {
-
 	actual := CreateSubnetID("mySubscription", "mySubscription", "myVnet", "mySubnet")
 
 	expected := "/subscriptions/mySubscription/resourceGroups/mySubscription/providers/Microsoft.Network/virtualNetworks/myVnet/subnets/mySubnet"
@@ -39,7 +36,6 @@ func TestCreateSubnetID(t *testing.T) {
 }
 
 func TestCreateSubnetFullName(t *testing.T) {
-
 	actual := CreateSubnetFullName("myResourceGroup", "myVirtualNetwork", "mySubnet")
 
 	expected := "myResourceGroup/myVirtualNetwork/mySubnet"
@@ -48,7 +44,6 @@ func TestCreateSubnetFullName(t *testing.T) {
 }
 
 func TestParseSubnetID(t *testing.T) {
-
 	subscriptionID, resourceGroup, provider, virtualNetwork, subnet, err := ParseSubnetID(
 		"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/myVirtualNetwork/subnets/mySubnet")
 
@@ -61,7 +56,6 @@ func TestParseSubnetID(t *testing.T) {
 }
 
 func TestParseSubnetIDNegative(t *testing.T) {
-
 	tests := []struct {
 		description string
 		input       string
@@ -116,7 +110,6 @@ func TestParseSubnetIDNegative(t *testing.T) {
 }
 
 func TestCreateNetappAccountID(t *testing.T) {
-
 	actual := CreateNetappAccountID("mySubscription", "myResourceGroup", "myNetappAccount")
 
 	expected := "/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount"
@@ -125,7 +118,6 @@ func TestCreateNetappAccountID(t *testing.T) {
 }
 
 func TestCreateNetappAccountFullName(t *testing.T) {
-
 	actual := CreateNetappAccountFullName("myResourceGroup", "myNetappAccount")
 
 	expected := "myResourceGroup/myNetappAccount"
@@ -134,7 +126,6 @@ func TestCreateNetappAccountFullName(t *testing.T) {
 }
 
 func TestParseCapacityPoolID(t *testing.T) {
-
 	subscriptionID, resourceGroup, provider, netappAccount, capacityPool, err := ParseCapacityPoolID(
 		"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool")
 
@@ -147,7 +138,6 @@ func TestParseCapacityPoolID(t *testing.T) {
 }
 
 func TestParseCapacityPoolIDNegative(t *testing.T) {
-
 	tests := []struct {
 		description string
 		input       string
@@ -202,7 +192,6 @@ func TestParseCapacityPoolIDNegative(t *testing.T) {
 }
 
 func TestCreateCapacityPoolFullName(t *testing.T) {
-
 	actual := CreateCapacityPoolFullName("myResourceGroup", "myNetappAccount", "myCapacityPool")
 
 	expected := "myResourceGroup/myNetappAccount/myCapacityPool"
@@ -211,7 +200,6 @@ func TestCreateCapacityPoolFullName(t *testing.T) {
 }
 
 func TestCreateVolumeID(t *testing.T) {
-
 	actual := CreateVolumeID("mySubscription", "myResourceGroup", "myNetappAccount", "myCapacityPool", "myVolume")
 
 	expected := "/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/myVolume"
@@ -220,7 +208,6 @@ func TestCreateVolumeID(t *testing.T) {
 }
 
 func TestCreateVolumeFullName(t *testing.T) {
-
 	actual := CreateVolumeFullName("myResourceGroup", "myNetappAccount", "myCapacityPool", "myVolume")
 
 	expected := "myResourceGroup/myNetappAccount/myCapacityPool/myVolume"
@@ -229,7 +216,6 @@ func TestCreateVolumeFullName(t *testing.T) {
 }
 
 func TestParseVolumeID(t *testing.T) {
-
 	subscriptionID, resourceGroup, provider, netappAccount, capacityPool, volume, err := ParseVolumeID(
 		"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/myVolume")
 
@@ -243,7 +229,6 @@ func TestParseVolumeID(t *testing.T) {
 }
 
 func TestParseVolumeIDNegative(t *testing.T) {
-
 	tests := []struct {
 		description string
 		input       string
@@ -305,8 +290,23 @@ func TestParseVolumeIDNegative(t *testing.T) {
 	}
 }
 
-func TestCreateSnapshotID(t *testing.T) {
+func TestParseVolumeName(t *testing.T) {
+	resourceGroup, netappAccount, capacityPool, volume, err := ParseVolumeName("myResourceGroup/myNetappAccount/myCapacityPool/myVolume")
 
+	assert.Nil(t, err)
+	assert.Equal(t, "myResourceGroup", resourceGroup)
+	assert.Equal(t, "myNetappAccount", netappAccount)
+	assert.Equal(t, "myCapacityPool", capacityPool)
+	assert.Equal(t, "myVolume", volume)
+}
+
+func TestParseVolumeNameNegative(t *testing.T) {
+	_, _, _, _, err := ParseVolumeName("myVolume")
+
+	assert.NotNil(t, err)
+}
+
+func TestCreateSnapshotID(t *testing.T) {
 	actual := CreateSnapshotID("mySubscription", "myResourceGroup", "myNetappAccount", "myCapacityPool", "myVolume", "mySnapshot")
 
 	expected := "/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/myVolume/snapshots/mySnapshot"
@@ -315,7 +315,6 @@ func TestCreateSnapshotID(t *testing.T) {
 }
 
 func TestCreateSnapshotFullName(t *testing.T) {
-
 	actual := CreateSnapshotFullName("myResourceGroup", "myNetappAccount", "myCapacityPool", "myVolume", "mySnapshot")
 
 	expected := "myResourceGroup/myNetappAccount/myCapacityPool/myVolume/mySnapshot"
@@ -324,7 +323,6 @@ func TestCreateSnapshotFullName(t *testing.T) {
 }
 
 func TestParseSnapshotID(t *testing.T) {
-
 	subscriptionID, resourceGroup, provider, netappAccount, capacityPool, volume, snapshot, err := ParseSnapshotID(
 		"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/myVolume/snapshots/mySnapshot")
 
@@ -339,7 +337,6 @@ func TestParseSnapshotID(t *testing.T) {
 }
 
 func TestParseSnapshotIDNegative(t *testing.T) {
-
 	tests := []struct {
 		description string
 		input       string
@@ -409,15 +406,152 @@ func TestParseSnapshotIDNegative(t *testing.T) {
 	}
 }
 
-func TestIsANFNotFoundError_Nil(t *testing.T) {
+func TestCreateSubvolumeID(t *testing.T) {
+	actual := CreateSubvolumeID("mySubscription", "myResourceGroup", "myNetappAccount", "myCapacityPool", "myVolume", "mySubvolume")
 
+	expected := "/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/myVolume/subvolumes/mySubvolume"
+
+	assert.Equal(t, expected, actual, "subvolume IDs not equal")
+}
+
+func TestCreateSubvolumeFullName(t *testing.T) {
+	actual := CreateSubvolumeFullName("myResourceGroup", "myNetappAccount", "myCapacityPool", "myVolume", "mySubvolume")
+
+	expected := "myResourceGroup/myNetappAccount/myCapacityPool/myVolume/mySubvolume"
+
+	assert.Equal(t, expected, actual, "subvolume full names not equal")
+}
+
+func TestParseSubvolumeID(t *testing.T) {
+	subscriptionID, resourceGroup, provider, netappAccount, capacityPool, volume, subvolume, err := ParseSubvolumeID(
+		"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/myVolume/subvolumes/mySubvolume")
+
+	assert.Equal(t, "mySubscription", subscriptionID, "subscriptionID not correct")
+	assert.Equal(t, "myResourceGroup", resourceGroup, "resourceGroup not correct")
+	assert.Equal(t, "Microsoft.NetApp", provider, "provider not correct")
+	assert.Equal(t, "myNetappAccount", netappAccount, "netappAccount not correct")
+	assert.Equal(t, "myCapacityPool", capacityPool, "capacityPool not correct")
+	assert.Equal(t, "myVolume", volume, "volume not correct")
+	assert.Equal(t, "mySubvolume", subvolume, "subvolume not correct")
+	assert.NoError(t, err, "error is not nil")
+}
+
+func TestParseSubvolumeIDNegative(t *testing.T) {
+	tests := []struct {
+		description string
+		input       string
+	}{
+		{
+			"no subscriptions key",
+			"/subscription/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/myVolume/subvolumes/mySubvolume",
+		},
+		{
+			"no subscriptions value",
+			"/subscriptions/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/myVolume/subvolumes/mySubvolume",
+		},
+		{
+			"no resource groups key",
+			"/subscriptions/mySubscription/resourceGroup/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/myVolume/subvolumes/mySubvolume",
+		},
+		{
+			"no resource groups value",
+			"/subscriptions/mySubscription/resourceGroups/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/myVolume/subvolumes/mySubvolume",
+		},
+		{
+			"no providers key",
+			"/subscriptions/mySubscription/resourceGroups/myResourceGroup/provider/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/myVolume/subvolumes/mySubvolume",
+		},
+		{
+			"no providers value",
+			"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/myVolume/subvolumes/mySubvolume",
+		},
+		{
+			"no accounts key",
+			"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/myNetappAccount/capacityPools/myCapacityPool/volumes/myVolume/subvolumes/mySubvolume",
+		},
+		{
+			"no accounts value",
+			"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/capacityPools/myCapacityPool/volumes/myVolume/subvolumes/mySubvolume",
+		},
+		{
+			"no capacity pools key",
+			"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/myCapacityPool/volumes/myVolume/subvolumes/mySubvolume",
+		},
+		{
+			"no capacity pools value",
+			"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/volumes/myVolume/subvolumes/mySubvolume",
+		},
+		{
+			"no volumes key",
+			"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/myVolume/subvolumes/mySubvolume",
+		},
+		{
+			"no volumes value",
+			"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/subvolumes/mySubvolume",
+		},
+		{
+			"no subvolumes key",
+			"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/myVolume/subvolume/mySubvolume",
+		},
+		{
+			"no subvolumes value",
+			"/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.NetApp/netAppAccounts/myNetappAccount/capacityPools/myCapacityPool/volumes/subvolumes",
+		},
+	}
+
+	for _, test := range tests {
+
+		_, _, _, _, _, _, _, err := ParseSubvolumeID(test.input)
+		assert.Error(t, err, test.description)
+	}
+}
+
+func TestExportPolicyExportImport(t *testing.T) {
+	rules := []ExportRule{
+		{
+			AllowedClients: "10.10.10.0/24",
+			Cifs:           false,
+			Nfsv3:          true,
+			Nfsv41:         false,
+			RuleIndex:      1,
+			UnixReadOnly:   false,
+			UnixReadWrite:  true,
+		},
+		{
+			AllowedClients: "10.10.20.0/24",
+			Cifs:           true,
+			Nfsv3:          false,
+			Nfsv41:         false,
+			RuleIndex:      2,
+			UnixReadOnly:   true,
+			UnixReadWrite:  false,
+		},
+	}
+
+	policy := &ExportPolicy{
+		Rules: rules,
+	}
+
+	exportResult := exportPolicyExport(policy)
+
+	assert.Equal(t, 2, len(*exportResult.Rules))
+	assert.Equal(t, int32(1), *(*(*exportResult).Rules)[0].RuleIndex)
+	assert.Equal(t, "10.10.10.0/24", *(*(*exportResult).Rules)[0].AllowedClients)
+	assert.Equal(t, int32(2), *(*(*exportResult).Rules)[1].RuleIndex)
+	assert.Equal(t, "10.10.20.0/24", *(*(*exportResult).Rules)[1].AllowedClients)
+
+	importResult := exportPolicyImport(exportResult)
+
+	assert.Equal(t, policy, importResult)
+}
+
+func TestIsANFNotFoundError_Nil(t *testing.T) {
 	result := IsANFNotFoundError(nil)
 
 	assert.False(t, result, "result should be false")
 }
 
 func TestIsANFNotFoundError_NotFound(t *testing.T) {
-
 	err := autorest.DetailedError{
 		Response: &http.Response{
 			StatusCode: http.StatusNotFound,
@@ -430,7 +564,6 @@ func TestIsANFNotFoundError_NotFound(t *testing.T) {
 }
 
 func TestIsANFNotFoundError_OtherAutorestError(t *testing.T) {
-
 	err := autorest.DetailedError{
 		Response: &http.Response{
 			StatusCode: http.StatusBadRequest,
@@ -443,7 +576,6 @@ func TestIsANFNotFoundError_OtherAutorestError(t *testing.T) {
 }
 
 func TestIsANFNotFoundError_OtherError(t *testing.T) {
-
 	err := errors.New("failed")
 
 	result := IsANFNotFoundError(err)
@@ -452,14 +584,12 @@ func TestIsANFNotFoundError_OtherError(t *testing.T) {
 }
 
 func TestGetCorrelationIDFromError_Nil(t *testing.T) {
-
 	result := GetCorrelationIDFromError(nil)
 
 	assert.Equal(t, "", result)
 }
 
 func TestGetCorrelationIDFromError_NoHeaders(t *testing.T) {
-
 	err := autorest.DetailedError{
 		Response: &http.Response{
 			StatusCode: http.StatusNotFound,
@@ -472,7 +602,6 @@ func TestGetCorrelationIDFromError_NoHeaders(t *testing.T) {
 }
 
 func TestGetCorrelationIDFromError_NoCorrelationIDHeader(t *testing.T) {
-
 	err := autorest.DetailedError{
 		Response: &http.Response{
 			StatusCode: http.StatusNotFound,
@@ -486,7 +615,6 @@ func TestGetCorrelationIDFromError_NoCorrelationIDHeader(t *testing.T) {
 }
 
 func TestGetCorrelationIDFromError_CorrelationIDHeaderEmpty(t *testing.T) {
-
 	err := autorest.DetailedError{
 		Response: &http.Response{
 			StatusCode: http.StatusNotFound,
@@ -501,7 +629,6 @@ func TestGetCorrelationIDFromError_CorrelationIDHeaderEmpty(t *testing.T) {
 }
 
 func TestGetCorrelationIDFromError_CorrelationIDHeaderPresent(t *testing.T) {
-
 	err := autorest.DetailedError{
 		Response: &http.Response{
 			StatusCode: http.StatusNotFound,
@@ -516,7 +643,6 @@ func TestGetCorrelationIDFromError_CorrelationIDHeaderPresent(t *testing.T) {
 }
 
 func TestGetCorrelationIDFromError_OtherError(t *testing.T) {
-
 	err := errors.New("failed")
 
 	result := GetCorrelationIDFromError(err)
@@ -525,10 +651,9 @@ func TestGetCorrelationIDFromError_OtherError(t *testing.T) {
 }
 
 func TestDerefString(t *testing.T) {
-
 	s := "test"
 
-	var testCases = []struct {
+	testCases := []struct {
 		Ptr            *string
 		ExpectedResult string
 	}{
@@ -543,10 +668,9 @@ func TestDerefString(t *testing.T) {
 }
 
 func TestDerefStringArray(t *testing.T) {
-
 	sa := []string{"test1", "test2"}
 
-	var testCases = []struct {
+	testCases := []struct {
 		Ptr            *[]string
 		ExpectedResult []string
 	}{
@@ -561,11 +685,10 @@ func TestDerefStringArray(t *testing.T) {
 }
 
 func TestDerefBool(t *testing.T) {
-
 	b1 := true
 	b2 := false
 
-	var testCases = []struct {
+	testCases := []struct {
 		Ptr            *bool
 		ExpectedResult bool
 	}{
@@ -581,11 +704,10 @@ func TestDerefBool(t *testing.T) {
 }
 
 func TestDerefInt32(t *testing.T) {
-
 	i1 := int32(0)
 	i2 := int32(42)
 
-	var testCases = []struct {
+	testCases := []struct {
 		Ptr            *int32
 		ExpectedResult int32
 	}{
@@ -601,11 +723,10 @@ func TestDerefInt32(t *testing.T) {
 }
 
 func TestDerefInt64(t *testing.T) {
-
 	i1 := int64(0)
 	i2 := int64(42)
 
-	var testCases = []struct {
+	testCases := []struct {
 		Ptr            *int64
 		ExpectedResult int64
 	}{
@@ -621,7 +742,6 @@ func TestDerefInt64(t *testing.T) {
 }
 
 func TestIsTerminalStateError(t *testing.T) {
-
 	err := TerminalState(errors.New("terminal"))
 
 	assert.True(t, IsTerminalStateError(err), "not terminal state error")

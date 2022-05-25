@@ -46,9 +46,11 @@ const (
 	REDACTED = "<REDACTED>"
 )
 
-var NFSVersionMajorRegex = regexp.MustCompile(`^(nfsvers|vers)=(?P<major>\d)$`)
-var NFSVersionMajorMinorRegex = regexp.MustCompile(`^(nfsvers|vers)=(?P<major>\d)\.(?P<minor>\d)$`)
-var NFSVersionMinorRegex = regexp.MustCompile(`^minorversion=(?P<minor>\d)$`)
+var (
+	NFSVersionMajorRegex      = regexp.MustCompile(`^(nfsvers|vers)=(?P<major>\d)$`)
+	NFSVersionMajorMinorRegex = regexp.MustCompile(`^(nfsvers|vers)=(?P<major>\d)\.(?P<minor>\d)$`)
+	NFSVersionMinorRegex      = regexp.MustCompile(`^minorversion=(?P<minor>\d)$`)
+)
 
 // ///////////////////////////////////////////////////////////////////////////
 //
@@ -71,6 +73,7 @@ type sizeUnit2 []string
 func (s sizeUnit2) Len() int {
 	return len(s)
 }
+
 // Swap implements the Swap method in sort.Interface
 // Parameters:
 //   i: index of first element to swap
@@ -85,6 +88,7 @@ func (s sizeUnit2) Len() int {
 func (s sizeUnit2) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
+
 // Less is used to sort the sizeUnit2 slice
 // It returns true if the length of the first string is greater than the length of the second string
 // Parameters:
@@ -101,8 +105,10 @@ func (s sizeUnit2) Less(i, j int) bool {
 	return len(s[i]) > len(s[j])
 }
 
-var lookupTable2 = make(map[string]int)
-var units2 = sizeUnit2{}
+var (
+	lookupTable2 = make(map[string]int)
+	units2       = sizeUnit2{}
+)
 
 func init() {
 	// populate the lookup table for binary suffixes
@@ -158,6 +164,7 @@ type sizeUnit10 []string
 func (s sizeUnit10) Len() int {
 	return len(s)
 }
+
 // Swap implements the sort.Interface
 // Parameters:
 //    i: index of the first element to swap
@@ -172,6 +179,7 @@ func (s sizeUnit10) Len() int {
 func (s sizeUnit10) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
+
 // Less is used to sort the sizeUnit10 slice
 // It returns true if the length of the first string is greater than the length of the second string
 // Parameters:
@@ -188,8 +196,10 @@ func (s sizeUnit10) Less(i, j int) bool {
 	return len(s[i]) > len(s[j])
 }
 
-var lookupTable10 = make(map[string]int)
-var units10 = sizeUnit10{}
+var (
+	lookupTable10 = make(map[string]int)
+	units10       = sizeUnit10{}
+)
 
 func init() {
 	// populate the lookup table for SI suffixes
@@ -227,7 +237,6 @@ func Pow(x int64, y int) int64 {
 
 // ConvertSizeToBytes converts size to bytes; see also https://en.wikipedia.org/wiki/Kilobyte
 func ConvertSizeToBytes(s string) (string, error) {
-
 	// make lowercase so units detection always works
 	s = strings.TrimSpace(strings.ToLower(s))
 
@@ -271,7 +280,6 @@ func ConvertSizeToBytes(s string) (string, error) {
 // suffix, that is handled here.  If there are no units, the default is GiB.  If size is not in opts, the specified
 // default value is parsed identically and used instead.
 func GetVolumeSizeBytes(ctx context.Context, opts map[string]string, defaultVolumeSize string) (uint64, error) {
-
 	usingDefaultSize := false
 	usingDefaultUnits := false
 
@@ -307,7 +315,6 @@ func GetVolumeSizeBytes(ctx context.Context, opts map[string]string, defaultVolu
 
 // sizeHasUnits checks whether a size string includes a units suffix.
 func sizeHasUnits(size string) bool {
-
 	// make lowercase so units detection always works
 	size = strings.TrimSpace(strings.ToLower(size))
 
@@ -327,8 +334,7 @@ func sizeHasUnits(size string) bool {
 // VolumeSizeWithinTolerance checks to see if requestedSize is within the delta of the currentSize.
 // If within the delta true is returned. If not within the delta and requestedSize is less than the
 // currentSize false is returned.
-func VolumeSizeWithinTolerance(requestedSize int64, currentSize int64, delta int64) (bool, error) {
-
+func VolumeSizeWithinTolerance(requestedSize, currentSize, delta int64) (bool, error) {
 	sizeDiff := requestedSize - currentSize
 	if sizeDiff < 0 {
 		sizeDiff = -sizeDiff
@@ -343,8 +349,7 @@ func VolumeSizeWithinTolerance(requestedSize int64, currentSize int64, delta int
 // GetV takes a map, key(s), and a defaultValue; will return the value of the key or defaultValue if none is set.
 // If keys is a string of key values separated by "|", then each key is tried in turn.  This allows compatibility
 // with deprecated values, i.e. "fstype|fileSystemType".
-func GetV(opts map[string]string, keys string, defaultValue string) string {
-
+func GetV(opts map[string]string, keys, defaultValue string) string {
 	for _, key := range strings.Split(keys, "|") {
 		// Try key first, then do a case-insensitive search
 		if value, ok := opts[key]; ok {
@@ -363,7 +368,7 @@ func GetV(opts map[string]string, keys string, defaultValue string) string {
 // RandomString returns a string of the specified length consisting only of alphabetic characters.
 func RandomString(strSize int) string {
 	chars := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	var bytes = make([]byte, strSize)
+	bytes := make([]byte, strSize)
 	rand.Read(bytes)
 	for i, b := range bytes {
 		bytes[i] = chars[b%byte(len(chars))]
@@ -608,7 +613,6 @@ func ReplaceImageRegistry(image, registry string) string {
 // ValidateCIDRs checks if a list of CIDR blocks are valid and returns a multi error containing all errors
 // which may occur during the parsing process.
 func ValidateCIDRs(ctx context.Context, cidrs []string) error {
-
 	var err error
 	// needed to capture all issues within the CIDR set
 	errors := make([]error, 0)
@@ -631,7 +635,6 @@ func ValidateCIDRs(ctx context.Context, cidrs []string) error {
 // FilterIPs takes a list of IPs and CIDRs and returns the sorted list of IPs that are contained by one or more of the
 // CIDRs
 func FilterIPs(ctx context.Context, ips, cidrs []string) ([]string, error) {
-
 	networks := make([]*net.IPNet, len(cidrs))
 	filteredIPs := make([]string, 0)
 
@@ -680,7 +683,6 @@ func FilterIPs(ctx context.Context, ips, cidrs []string) ([]string, error) {
 //
 // -- Doc autogenerated on 2022-05-12 15:04:08.156871 --
 func GetYAMLTagWithSpaceCount(text, tagName string) (string, int) {
-
 	// This matches pattern in a multiline string of type "    {something}\n"
 	tagsWithIndentationRegex := regexp.MustCompile(`(?m)^[\t ]*{` + tagName + `}$\n`)
 	tag := tagsWithIndentationRegex.FindStringSubmatch(text)
@@ -716,7 +718,6 @@ func CountSpacesBeforeText(text string) int {
 // yes (or on): Create a device if one of some conditions are met
 // other possible values: smart, greedy, strict
 func GetFindMultipathValue(text string) string {
-
 	// This matches pattern in a multiline string of type "    find_multipaths: yes"
 	tagsWithIndentationRegex := regexp.MustCompile(`(?m)^[\t ]*find_multipaths[\t ]*["|']?(?P<tagName>[\w-_]+)["|']?[\t ]*$`)
 	tag := tagsWithIndentationRegex.FindStringSubmatch(text)
@@ -774,7 +775,6 @@ func SanitizeMountOptions(mountOptions string, removeMountOptions []string) stri
 // if none is found, plus an error (if any).  If a set of supported versions is supplied, and the returned
 // version isn't in it, this method returns an error; otherwise it returns nil.
 func GetNFSVersionFromMountOptions(mountOptions, defaultVersion string, supportedVersions []string) (string, error) {
-
 	major := ""
 	minor := ""
 
@@ -829,7 +829,6 @@ func GetNFSVersionFromMountOptions(mountOptions, defaultVersion string, supporte
 // GetNFSVersionMountOptions accepts a set of mount options, identifies
 // and returns all of the NFS version mount options.
 func GetNFSVersionMountOptions(mountOptions string) []string {
-
 	// Strip off -o prefix if present
 	NFSMountOptions := make([]string, 0)
 
@@ -862,7 +861,6 @@ func GetNFSVersionMountOptions(mountOptions string) []string {
 
 // SetNFSVersionMountOptions removes any existing NFS version mount option and sets passed NFS version mount options.
 func SetNFSVersionMountOptions(mountOptions, newNFSVersionMountOption string) string {
-
 	// Strip off -o prefix if present or any "," at the end
 	mountOptions = strings.TrimPrefix(mountOptions, "-o ")
 	mountOptions = strings.TrimSuffix(mountOptions, ",")
@@ -881,7 +879,6 @@ func SetNFSVersionMountOptions(mountOptions, newNFSVersionMountOption string) st
 // GetRegexSubmatches accepts a regular expression with one or more groups and returns a map
 // of the group matches found in the supplied string.
 func GetRegexSubmatches(r *regexp.Regexp, s string) map[string]string {
-
 	match := r.FindStringSubmatch(s)
 	if match == nil {
 		return nil
@@ -967,7 +964,6 @@ func MinInt64(a, b int64) int64 {
 //
 // -- Doc autogenerated on 2022-05-12 15:04:08.156871 --
 func ValidateOctalUnixPermissions(perms string) error {
-
 	permsRegex := regexp.MustCompile(`^[0-7]{4}$`)
 
 	if !permsRegex.MatchString(perms) {
@@ -998,7 +994,6 @@ func GenerateVolumePublishName(volumeID, nodeID string) string {
 // ToStringRedacted identifies attributes of a struct, stringifies them such that they can be consumed by the
 // struct's stringer interface, and redacts elements specified in the redactList.
 func ToStringRedacted(structPointer interface{}, redactList []string, configVal interface{}) (out string) {
-
 	defer func() {
 		if r := recover(); r != nil {
 			log.Errorf("Panic in utils#ToStringRedacted; err: %v", r)
@@ -1080,7 +1075,6 @@ func GetVerifiedBlockFsType(filesystemType string) (string, error) {
 
 // VerifyFilesystemSupport checks for a supported file system type
 func VerifyFilesystemSupport(fs string) (string, error) {
-
 	fstype := strings.ToLower(fs)
 	switch fstype {
 	case fsXfs, fsExt3, fsExt4, fsRaw:

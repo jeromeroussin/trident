@@ -4,6 +4,7 @@ package cmd
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -111,7 +112,6 @@ func init() {
 }
 
 func discoverOperatingMode(_ *cobra.Command) error {
-
 	defer func() {
 		if !Debug {
 			return
@@ -174,7 +174,6 @@ func discoverOperatingMode(_ *cobra.Command) error {
 }
 
 func discoverJustOperatingMode(_ *cobra.Command) error {
-
 	defer func() {
 		if !Debug {
 			return
@@ -221,7 +220,6 @@ func discoverJustOperatingMode(_ *cobra.Command) error {
 }
 
 func discoverKubernetesCLI() error {
-
 	// Try the OpenShift CLI first
 	_, err := exec.Command(CLIOpenshift, "version").Output()
 	if GetExitCodeFromError(err) == ExitCodeSuccess {
@@ -246,7 +244,6 @@ func discoverKubernetesCLI() error {
 
 // getCurrentNamespace returns the default namespace from service account info
 func getCurrentNamespace() (string, error) {
-
 	// Get current namespace from service account info
 	cmd := exec.Command(KubernetesCLI, "get", "serviceaccount", "default", "-o=json")
 	stdout, err := cmd.StdoutPipe()
@@ -265,7 +262,7 @@ func getCurrentNamespace() (string, error) {
 		return "", err
 	}
 
-	//fmt.Printf("%+v\n", serviceAccount)
+	// fmt.Printf("%+v\n", serviceAccount)
 
 	// Get Trident pod name & namespace
 	namespace := serviceAccount.ObjectMeta.Namespace
@@ -274,7 +271,6 @@ func getCurrentNamespace() (string, error) {
 }
 
 func discoverAutosupportCollector() {
-
 	switch OperatingMode {
 	case ModeDirect:
 		envCollector := os.Getenv("TRIDENT_AUTOSUPPORT_COLLECTOR")
@@ -290,7 +286,6 @@ func discoverAutosupportCollector() {
 
 // getTridentPod returns the name of the Trident pod in the specified namespace
 func getTridentPod(namespace, appLabel string) (string, error) {
-
 	// Get 'trident' pod info
 	cmd := exec.Command(
 		KubernetesCLI,
@@ -329,7 +324,6 @@ func getTridentPod(namespace, appLabel string) (string, error) {
 
 // getTridentOperatorPod returns the name and namespace of the Trident pod
 func getTridentOperatorPod(appLabel string) (string, string, error) {
-
 	// Get 'trident-operator' pod info
 	cmd := exec.Command(
 		KubernetesCLI,
@@ -482,7 +476,6 @@ func listTridentNodes(namespace string) (map[string]string, error) {
 }
 
 func BaseURL() string {
-
 	url := fmt.Sprintf("http://%s%s", Server, config.BaseURL)
 
 	if Debug {
@@ -493,7 +486,6 @@ func BaseURL() string {
 }
 
 func BaseAutosupportURL() string {
-
 	url := fmt.Sprintf("http://%s%s", AutosupportCollector, AutosupportCollectorURL)
 
 	if Debug {
@@ -504,7 +496,6 @@ func BaseAutosupportURL() string {
 }
 
 func TunnelCommand(commandArgs []string) {
-
 	// Build tunnel command to exec command in container
 	execCommand := []string{"exec", TridentPodName, "-n", TridentPodNamespace, "-c", config.ContainerTrident, "--"}
 
@@ -536,8 +527,7 @@ func TunnelCommand(commandArgs []string) {
 	}
 }
 
-func TunnelCommandRaw(commandArgs []string) ([]byte, error) {
-
+func TunnelCommandRaw(commandArgs []string) ([]byte, []byte, error) {
 	// Build tunnel command to exec command in container
 	execCommand := []string{"exec", TridentPodName, "-n", TridentPodNamespace, "-c", config.ContainerTrident, "--"}
 
@@ -552,15 +542,20 @@ func TunnelCommandRaw(commandArgs []string) ([]byte, error) {
 		fmt.Printf("Invoking tunneled command: %s %v\n", KubernetesCLI, strings.Join(execCommand, " "))
 	}
 
-	// Invoke tridentctl inside the Trident pod
-	output, err := exec.Command(KubernetesCLI, execCommand...).CombinedOutput()
+	// Invoke tridentctl inside the Trident pod and get Stdout and Stderr separately in two buffers
+	// Capture the Stdout for the command in outbuff which will later be unmarshalled and
+	// capture the Stderr for the command in os.Stderr
+	cmd := exec.Command(KubernetesCLI, execCommand...)
+	var outbuff, stderrBuff bytes.Buffer
+	cmd.Stdout = &outbuff
+	cmd.Stderr = &stderrBuff
+	err := cmd.Run()
 
 	SetExitCodeFromError(err)
-	return output, err
+	return outbuff.Bytes(), stderrBuff.Bytes(), err
 }
 
 func GetErrorFromHTTPResponse(response *http.Response, responseBody []byte) error {
-
 	var errorResponse api.ErrorResponse
 	if err := json.Unmarshal(responseBody, &errorResponse); err == nil {
 		return fmt.Errorf("%s (%s)", errorResponse.Error, response.Status)
@@ -590,7 +585,6 @@ func GetExitCodeFromError(err error) int {
 }
 
 func getUserConfirmation(s string, cmd *cobra.Command) (bool, error) {
-
 	reader := bufio.NewReader(cmd.InOrStdin())
 
 	for {
@@ -619,7 +613,6 @@ func homeDir() string {
 }
 
 func kubeConfigPath() string {
-
 	// If KUBECONFIG contains multiple paths, return the first one.
 	if paths := os.Getenv("KUBECONFIG"); paths != "" {
 		for _, path := range strings.Split(paths, ":") {
